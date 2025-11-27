@@ -138,7 +138,7 @@ const Donate = () => {
     }
   ];
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     if (!nickname.trim()) {
       toast({
         title: "Ошибка",
@@ -148,16 +148,59 @@ const Donate = () => {
       return;
     }
 
-    toast({
-      title: "Переход к оплате",
-      description: `Обработка заказа для ${nickname}...`,
-    });
+    if (!selectedPackage) return;
 
-    setTimeout(() => {
-      setSelectedPackage(null);
-      setNickname('');
-      setPromoCode('');
-    }, 2000);
+    try {
+      toast({
+        title: "Создание заказа",
+        description: "Обрабатываем ваш запрос...",
+      });
+
+      const response = await fetch('https://functions.poehali.dev/f788407c-1bde-4508-bc66-32135b60a946', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nickname: nickname,
+          package_id: selectedPackage.id,
+          package_name: selectedPackage.name,
+          price: selectedPackage.price,
+          promo_code: promoCode
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "✅ Заказ создан!",
+          description: `Номер заказа: ${data.order_id}. Скидка: ${data.discount}%`,
+        });
+
+        setTimeout(() => {
+          window.open(data.payment_url, '_blank');
+        }, 500);
+
+        setTimeout(() => {
+          setSelectedPackage(null);
+          setNickname('');
+          setPromoCode('');
+        }, 2000);
+      } else {
+        toast({
+          title: "Ошибка",
+          description: data.error || "Не удалось создать заказ",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка сети",
+        description: "Проверьте подключение к интернету",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

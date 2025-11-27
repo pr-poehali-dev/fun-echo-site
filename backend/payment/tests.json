@@ -1,0 +1,45 @@
+{
+  "tests": [
+    {
+      "name": "Create payment order",
+      "method": "POST",
+      "body": {
+        "nickname": "TestPlayer",
+        "package_id": "vip",
+        "package_name": "VIP",
+        "price": 149,
+        "promo_code": ""
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "order_id": "string",
+        "payment_url": "string",
+        "original_price": 149,
+        "final_price": 149,
+        "discount": 0,
+        "nickname": "TestPlayer",
+        "package": "VIP"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create order with promo code",
+      "method": "POST",
+      "body": {
+        "nickname": "PromoPlayer",
+        "package_id": "premium",
+        "package_name": "PREMIUM",
+        "price": 299,
+        "promo_code": "START"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "discount": 10,
+        "final_price": 269
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
