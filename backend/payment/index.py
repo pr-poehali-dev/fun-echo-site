@@ -73,7 +73,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             cur.close()
             conn.close()
             
-            payment_url = f"https://payment.example.com/pay?order={order_id}&amount={final_price}"
+            merchant_id = os.environ.get('FREEKASSA_MERCHANT_ID', '12345')
+            secret_key = os.environ.get('FREEKASSA_SECRET_KEY', 'secret')
+            
+            import hashlib
+            sign_string = f"{merchant_id}:{final_price}:{secret_key}:{order_id}"
+            sign = hashlib.md5(sign_string.encode()).hexdigest()
+            
+            payment_url = f"https://pay.freekassa.com/?m={merchant_id}&oa={final_price}&o={order_id}&s={sign}&us_nickname={order_req.nickname}&us_package={order_req.package_id}"
             
             result = {
                 'success': True,
