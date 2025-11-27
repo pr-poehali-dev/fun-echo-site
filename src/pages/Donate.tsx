@@ -23,6 +23,7 @@ const Donate = () => {
   const [selectedPackage, setSelectedPackage] = useState<DonatePackage | null>(null);
   const [nickname, setNickname] = useState('');
   const [promoCode, setPromoCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const donatePackages: DonatePackage[] = [
@@ -150,6 +151,8 @@ const Donate = () => {
 
     if (!selectedPackage) return;
 
+    setIsLoading(true);
+
     try {
       toast({
         title: "Создание заказа",
@@ -186,6 +189,7 @@ const Donate = () => {
           setSelectedPackage(null);
           setNickname('');
           setPromoCode('');
+          setIsLoading(false);
         }, 2000);
       } else {
         toast({
@@ -193,6 +197,7 @@ const Donate = () => {
           description: data.error || "Не удалось создать заказ",
           variant: "destructive"
         });
+        setIsLoading(false);
       }
     } catch (error) {
       toast({
@@ -200,6 +205,7 @@ const Donate = () => {
         description: "Проверьте подключение к интернету",
         variant: "destructive"
       });
+      setIsLoading(false);
     }
   };
 
@@ -346,7 +352,7 @@ const Donate = () => {
       </div>
 
       <Dialog open={!!selectedPackage} onOpenChange={() => setSelectedPackage(null)}>
-        <DialogContent className="sm:max-w-md bg-card border-2" style={{ borderColor: selectedPackage?.color }}>
+        <DialogContent className="sm:max-w-md bg-background border-2 text-foreground" style={{ borderColor: selectedPackage?.color }}>
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-3">
               <div 
@@ -408,9 +414,19 @@ const Donate = () => {
                 color: '#fff'
               }}
               onClick={handlePurchase}
+              disabled={isLoading}
             >
-              <Icon name="CreditCard" size={20} className="mr-2" />
-              Перейти к оплате
+              {isLoading ? (
+                <>
+                  <Icon name="Loader2" size={20} className="mr-2 animate-spin" />
+                  Обработка...
+                </>
+              ) : (
+                <>
+                  <Icon name="CreditCard" size={20} className="mr-2" />
+                  Перейти к оплате
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
